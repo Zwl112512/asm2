@@ -1,5 +1,5 @@
 
-import 'package:asm2/screens/chat_bot_page.dart';
+// import 'package:asm2/screens/chat_bot_page.dart';
 import 'package:asm2/screens/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
