@@ -1,16 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:googleapis_auth/auth_io.dart';
+import 'package:flutter/services.dart';
 import 'package:googleapis/dialogflow/v2.dart';
+import 'package:googleapis_auth/auth_io.dart';
 
 class DialogflowService {
-  final String _projectId = 'YOUR_PROJECT_ID'; // 替换为你的 Google Cloud 项目 ID
+  final String _projectId = '<YOUR_PROJECT_ID>'; // 替换为你的 Google Cloud 项目 ID
   final String _languageCode = 'en'; // 设置语言代码，例如 'en' 或 'zh-CN'
 
   Future<String> sendMessage(String message) async {
     try {
       // 加载服务账号 JSON 文件
-      final serviceAccountJson = File('assets/dialogflow_key.json').readAsStringSync();
+      final serviceAccountJson = await rootBundle.loadString('assets/dialogflow_key.json');
       final credentials = ServiceAccountCredentials.fromJson(jsonDecode(serviceAccountJson));
 
       // 配置权限范围
@@ -36,8 +37,6 @@ class DialogflowService {
 
       // 调用 API
       final response = await dialogflow.projects.agent.sessions.detectIntent(request, sessionPath);
-
-      // 解析回复
       return response.queryResult?.fulfillmentText ?? 'No response from Dialogflow';
     } catch (e) {
       print('Dialogflow error: $e');
