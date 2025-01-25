@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'restaurants_page.dart';
-import 'chat_bot_page.dart'; // 引入聊天机器人页面
+// import 'chat_bot_page.dart'; // 引入聊天机器人页面
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _pages = [
     RestaurantsPage(),
     OrdersPage(),
-    ChatBotPage(), // 添加聊天机器人页面
+    //ChatBotPage(), // 添加聊天机器人页面
     ProfilePage(),
   ];
 
