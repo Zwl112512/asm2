@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'restaurants_page.dart';
-// import 'chat_bot_page.dart'; // 引入聊天机器人页面
+import 'maps_page.dart'; // 引入聊天机器人页面
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
+import 'package:asm2/screens/chatbot_page.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -19,7 +20,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _pages = [
     RestaurantsPage(),
     OrdersPage(),
-    //ChatBotPage(), // 添加聊天机器人页面
+    MapsPage(),
+    ChatBotPage(),
     ProfilePage(),
   ];
 
@@ -59,7 +61,8 @@ class _HomeScreenState extends State<HomeScreen> {
         items: const [
           TabItem(icon: Icons.restaurant, title: 'Restaurants'),
           TabItem(icon: Icons.shopping_cart, title: 'Orders'),
-          TabItem(icon: Icons.chat, title: 'ChatBot'),
+          TabItem(icon: Icons.map, title: 'Map'),
+          TabItem(icon: Icons.chat, title: 'Chatbot'),
           TabItem(icon: Icons.person, title: 'Profile'),
         ],
         initialActiveIndex: _selectedIndex, // 当前选中的索引
