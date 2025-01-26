@@ -29,7 +29,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
     final currentUser = FirebaseAuth.instance.currentUser;
     _nameController = TextEditingController(text: widget.userData['name']);
     _emailController = TextEditingController(text: currentUser?.email ?? '');
-    _phoneController = TextEditingController(text: widget.userData['phone']);
+    _phoneController = TextEditingController(
+      text: widget.userData['phone']?.toString() ?? '', // 确保 phone 为字符串
+    );
     _addressController = TextEditingController(text: widget.userData['address']);
     _profileImage = widget.userData['profileImage'];
   }
@@ -41,7 +43,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         await FirebaseFirestore.instance.collection('users').doc(userId).update({
           'name': _nameController.text,
           'email': _emailController.text,
-          'phone': _phoneController.text,
+          'phone': int.tryParse(_phoneController.text) ?? 0,
           'address': _addressController.text,
           'profileImage': _profileImage,
         });
