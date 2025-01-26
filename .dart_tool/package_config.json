@@ -50,6 +50,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "chat_gpt_sdk",
+      "rootUri": "file:///C:/Users/Echo/AppData/Local/Pub/Cache/hosted/pub.dev/chat_gpt_sdk-3.1.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
       "name": "clock",
       "rootUri": "file:///C:/Users/Echo/AppData/Local/Pub/Cache/hosted/pub.dev/clock-1.1.1",
       "packageUri": "lib/",
@@ -116,10 +122,40 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "dio",
+      "rootUri": "file:///C:/Users/Echo/AppData/Local/Pub/Cache/hosted/pub.dev/dio-5.7.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
+    },
+    {
+      "name": "dio_compatibility_layer",
+      "rootUri": "file:///C:/Users/Echo/AppData/Local/Pub/Cache/hosted/pub.dev/dio_compatibility_layer-0.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "dio_web_adapter",
+      "rootUri": "file:///C:/Users/Echo/AppData/Local/Pub/Cache/hosted/pub.dev/dio_web_adapter-2.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
       "name": "fake_async",
       "rootUri": "file:///C:/Users/Echo/AppData/Local/Pub/Cache/hosted/pub.dev/fake_async-1.3.1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
+    },
+    {
+      "name": "fetch_api",
+      "rootUri": "file:///C:/Users/Echo/AppData/Local/Pub/Cache/hosted/pub.dev/fetch_api-2.2.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "fetch_client",
+      "rootUri": "file:///C:/Users/Echo/AppData/Local/Pub/Cache/hosted/pub.dev/fetch_client-1.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
     },
     {
       "name": "ffi",
@@ -156,6 +192,24 @@
       "rootUri": "file:///C:/Users/Echo/AppData/Local/Pub/Cache/hosted/pub.dev/file_selector_windows-0.9.3+3",
       "packageUri": "lib/",
       "languageVersion": "3.3"
+    },
+    {
+      "name": "firebase_app_check",
+      "rootUri": "file:///C:/Users/Echo/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_app_check-0.3.2+1",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_app_check_platform_interface",
+      "rootUri": "file:///C:/Users/Echo/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_app_check_platform_interface-0.1.1+1",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_app_check_web",
+      "rootUri": "file:///C:/Users/Echo/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_app_check_web-0.2.0+5",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
     },
     {
       "name": "firebase_auth",
@@ -276,6 +330,42 @@
       "rootUri": "file:///C:/Users/Echo/flutter/flutter/packages/flutter_web_plugins",
       "packageUri": "lib/",
       "languageVersion": "3.2"
+    },
+    {
+      "name": "geolocator",
+      "rootUri": "file:///C:/Users/Echo/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator-13.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.15"
+    },
+    {
+      "name": "geolocator_android",
+      "rootUri": "file:///C:/Users/Echo/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_android-4.6.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.15"
+    },
+    {
+      "name": "geolocator_apple",
+      "rootUri": "file:///C:/Users/Echo/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_apple-2.3.8+1",
+      "packageUri": "lib/",
+      "languageVersion": "2.15"
+    },
+    {
+      "name": "geolocator_platform_interface",
+      "rootUri": "file:///C:/Users/Echo/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_platform_interface-4.2.4",
+      "packageUri": "lib/",
+      "languageVersion": "2.15"
+    },
+    {
+      "name": "geolocator_web",
+      "rootUri": "file:///C:/Users/Echo/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_web-4.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "geolocator_windows",
+      "rootUri": "file:///C:/Users/Echo/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_windows-0.2.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.15"
     },
     {
       "name": "google_maps",
@@ -734,7 +824,7 @@
       "languageVersion": "3.5"
     }
   ],
-  "generated": "2025-01-26T15:09:50.095517Z",
+  "generated": "2025-01-26T18:24:20.031706Z",
   "generator": "pub",
   "generatorVersion": "3.5.4",
   "flutterRoot": "file:///C:/Users/Echo/flutter/flutter",
