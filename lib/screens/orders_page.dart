@@ -1,23 +1,37 @@
-import 'package:asm2/screens/OrderDetailsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'OrderDetailsPage.dart';
 
 class OrdersPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('My Orders')),
+      appBar: AppBar(
+        title: Text(
+          'My Orders',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+      ),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection('orders')
-            .orderBy('orderDate', descending: true) // 按照时间降序排序
+            .orderBy('orderDate', descending: true)
             .snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('No orders found.'));
+            return Center(
+              child: Text(
+                'No orders found.',
+                style: TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+            );
           }
 
           final orders = snapshot.data!.docs;
@@ -26,30 +40,56 @@ class OrdersPage extends StatelessWidget {
             itemCount: orders.length,
             itemBuilder: (context, index) {
               final order = orders[index];
-              final orderDate = (order['orderDate'] as Timestamp).toDate(); // 转换为 DateTime
+              final orderDate = (order['orderDate'] as Timestamp).toDate();
               final formattedDate =
                   '${orderDate.year}-${orderDate.month.toString().padLeft(2, '0')}-${orderDate.day.toString().padLeft(2, '0')} ${orderDate.hour.toString().padLeft(2, '0')}:${orderDate.minute.toString().padLeft(2, '0')}';
 
-
               return Card(
-                margin: EdgeInsets.all(10),
+                margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 2,
                 child: ListTile(
-                  title: Text('Order #${order.id}'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Total: \$${order['totalAmount'].toStringAsFixed(2)}'),
-                      Text('Date: $formattedDate'),
-                      Text('Status: ${order['status']}'),
-                    ],
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  title: Text(
+                    'Order #${order.id}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Total: \$${order['totalAmount'].toStringAsFixed(2)}',
+                          style: TextStyle(color: Colors.black54),
+                        ),
+                        Text(
+                          'Date: $formattedDate',
+                          style: TextStyle(color: Colors.black54),
+                        ),
+                        Text(
+                          'Status: ${order['status']}',
+                          style: TextStyle(
+                            color: order['status'] == 'Completed'
+                                ? Colors.green
+                                : Colors.redAccent,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   trailing: IconButton(
-                    icon: Icon(Icons.delete, color: Colors.red),
+                    icon: Icon(Icons.delete, color: Colors.redAccent),
                     onPressed: () async {
-                      // 二次确认对话框
                       final confirm = await showDialog<bool>(
                         context: context,
-                        builder: (BuildContext context) {
+                        builder: (context) {
                           return AlertDialog(
                             title: Text('Confirm Delete'),
                             content: Text('Are you sure you want to delete this order?'),
@@ -60,7 +100,10 @@ class OrdersPage extends StatelessWidget {
                               ),
                               TextButton(
                                 onPressed: () => Navigator.of(context).pop(true),
-                                child: Text('Delete'),
+                                child: Text(
+                                  'Delete',
+                                  style: TextStyle(color: Colors.red),
+                                ),
                               ),
                             ],
                           );
@@ -68,13 +111,11 @@ class OrdersPage extends StatelessWidget {
                       );
 
                       if (confirm == true) {
-                        // 删除订单逻辑
                         try {
                           await FirebaseFirestore.instance
                               .collection('orders')
                               .doc(order.id)
                               .delete();
-
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Order deleted successfully!')),
                           );
@@ -96,10 +137,8 @@ class OrdersPage extends StatelessWidget {
                   },
                 ),
               );
-
             },
           );
-
         },
       ),
     );
