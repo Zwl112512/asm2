@@ -27,34 +27,67 @@ class _ChatBotPageState extends State<ChatBotPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromRGBO(0, 166, 126, 1),
-        title: const Text(
-          'GPT Chat',
-          style: TextStyle(color: Colors.white),
+        backgroundColor: Colors.white,
+        elevation: 2,
+        title: Row(
+          children: [
+            Icon(Icons.chat, color: Colors.teal),
+            const SizedBox(width: 10),
+            const Text(
+              'Chat Bot',
+              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
+        centerTitle: true,
       ),
-      body: DashChat(
-        currentUser: _currentUser,
-        messageOptions: const MessageOptions(
-          currentUserContainerColor: Colors.black,
-          containerColor: Color.fromRGBO(0, 166, 126, 1),
-          textColor: Colors.white,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.white, Color(0xFFE0F7FA)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
         ),
-        onSend: (ChatMessage m) {
-          getChatResponse(m);
-        },
-        messages: _messages,
+        child: DashChat(
+          currentUser: _currentUser,
+          messageOptions: const MessageOptions(
+            currentUserContainerColor: Colors.teal,
+            currentUserTextColor: Colors.white,
+            containerColor: Colors.white,
+            textColor: Colors.black,
+            borderRadius: 18, // 设置聊天气泡的圆角
+          ),
+          inputOptions: const InputOptions(
+            inputDecoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              hintText: 'Type a message...',
+              prefixIcon: Icon(Icons.message, color: Colors.teal),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(25)),
+                borderSide: BorderSide(color: Colors.teal),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(25)),
+                borderSide: BorderSide(color: Colors.teal, width: 2),
+              ),
+            ),
+          ),
+          onSend: (ChatMessage m) {
+            getChatResponse(m);
+          },
+          messages: _messages,
+        ),
       ),
     );
   }
 
   Future<void> getChatResponse(ChatMessage m) async {
-    // 插入用户消息
     setState(() {
       _messages.insert(0, m);
     });
 
-    // 构造消息历史记录
     List<Map<String, dynamic>> _messagesHistory = _messages.reversed.map((msg) {
       if (msg.user == _currentUser) {
         return {"role": "user", "content": msg.text};
@@ -63,19 +96,16 @@ class _ChatBotPageState extends State<ChatBotPage> {
       }
     }).toList();
 
-    // 构建请求
     final request = ChatCompleteText(
       model: Gpt4oMini2024ChatModel(),
       messages: _messagesHistory,
       maxToken: 200,
     );
 
-    // 调用 OpenAI API 并获取响应
     try {
       final response = await _openAI.onChatCompletion(request: request);
       final botMessage = response?.choices[0].message?.content ?? "No response";
 
-      // 插入 GPT 回复
       setState(() {
         _messages.insert(
           0,
@@ -87,7 +117,6 @@ class _ChatBotPageState extends State<ChatBotPage> {
         );
       });
     } catch (e) {
-      // 处理错误
       setState(() {
         _messages.insert(
           0,
