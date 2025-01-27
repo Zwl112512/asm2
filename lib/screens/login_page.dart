@@ -18,13 +18,23 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
+      // 用户登录
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
-      // 登录成功后跳转到主页
-      Navigator.pushReplacementNamed(context, '/home');
+      // 获取当前登录用户
+      final user = FirebaseAuth.instance.currentUser;
+
+      // 判断是否为管理员账号
+      if (user != null && user.email == 'admin@admin.com') {
+        // 如果是管理员，导航到管理员页面
+        Navigator.pushReplacementNamed(context, '/admin-add-restaurant');
+      } else {
+        // 如果是普通用户，导航到普通主页
+        Navigator.pushReplacementNamed(context, '/home');
+      }
     } on FirebaseAuthException catch (e) {
       String errorMessage;
       if (e.code == 'user-not-found') {
@@ -47,6 +57,7 @@ class _LoginPageState extends State<LoginPage> {
       });
     }
   }
+
 
   // 显示错误提示
   void _showErrorSnackBar(String message) {
