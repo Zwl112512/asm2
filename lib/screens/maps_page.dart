@@ -10,9 +10,9 @@ class MapsPage extends StatefulWidget {
 
 class _MapsPageState extends State<MapsPage> {
   late GoogleMapController _mapController;
-  LatLng _initialPosition = const LatLng(0, 0); // 初始化为 (0, 0)
+  LatLng _initialPosition = const LatLng(0, 0);
   final Set<Marker> _markers = {};
-  bool _isLocationFetched = false; // 用于标记是否已经获取到位置
+  bool _isLocationFetched = false;
 
   @override
   void initState() {
@@ -20,18 +20,15 @@ class _MapsPageState extends State<MapsPage> {
     _getCurrentLocation();
   }
 
-// 获取当前位置
   Future<void> _getCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // 检查位置服务是否启用
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       return Future.error('Location services are disabled.');
     }
 
-    // 检查位置权限
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -45,55 +42,49 @@ class _MapsPageState extends State<MapsPage> {
           'Location permissions are permanently denied, we cannot request permissions.');
     }
 
-    // 获取当前位置
     final position = await Geolocator.getCurrentPosition();
     setState(() {
       _initialPosition = LatLng(position.latitude, position.longitude);
       _isLocationFetched = true;
     });
 
-    // 打印获取到的经纬度信息
-    print('Current latitude: ${position.latitude}, longitude: ${position.longitude}');
-
-    // 如果地图控制器已经初始化，移动相机到当前位置
     if (_mapController != null) {
       _moveCameraToCurrentLocation();
     }
   }
 
-  // 地图加载完成时的回调
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
     _fetchMarkersFromFirebase();
 
-    // 如果已经获取到位置，移动相机到当前位置
     if (_isLocationFetched) {
       _moveCameraToCurrentLocation();
     }
   }
 
-  // 移动相机到当前位置
   void _moveCameraToCurrentLocation() {
     _mapController.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
           target: _initialPosition,
-          zoom: 15.0, // 调整缩放级别，可根据需要修改
+          zoom: 15.0,
         ),
       ),
     );
   }
 
-  // 从 Firebase 获取餐厅位置
   Future<void> _fetchMarkersFromFirebase() async {
     try {
-      final querySnapshot = await FirebaseFirestore.instance.collection('restaurants').get();
+      final querySnapshot =
+      await FirebaseFirestore.instance.collection('restaurants').get();
 
       setState(() {
         for (var doc in querySnapshot.docs) {
           final data = doc.data();
-          if (data.containsKey('latitude') && data.containsKey('longitude') &&
-              data.containsKey('name') && data.containsKey('location')) {
+          if (data.containsKey('latitude') &&
+              data.containsKey('longitude') &&
+              data.containsKey('name') &&
+              data.containsKey('location')) {
             final marker = Marker(
               markerId: MarkerId(doc.id),
               position: LatLng(data['latitude'], data['longitude']),
@@ -124,17 +115,38 @@ class _MapsPageState extends State<MapsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Google Maps Example'),
+        title: Text('Nearby Restaurants'),
+        centerTitle: true,
+        backgroundColor: Colors.blueAccent,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () => _getCurrentLocation(),
+          ),
+        ],
       ),
-      body: GoogleMap(
-        onMapCreated: _onMapCreated,
-        initialCameraPosition: CameraPosition(
-          target: _initialPosition,
-          zoom: 10.0,
-        ),
-        markers: _markers,
-        myLocationEnabled: true, // 开启显示当前位置
-        myLocationButtonEnabled: true, // 开启显示定位按钮
+      body: Stack(
+        children: [
+          GoogleMap(
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: CameraPosition(
+              target: _initialPosition,
+              zoom: 10.0,
+            ),
+            markers: _markers,
+            myLocationEnabled: true,
+            myLocationButtonEnabled: false,
+          ),
+          Positioned(
+            bottom: 100,
+            right: 5,
+            child: FloatingActionButton(
+              onPressed: _moveCameraToCurrentLocation,
+              backgroundColor: Colors.blueAccent,
+              child: Icon(Icons.my_location, color: Colors.white),
+            ),
+          ),
+        ],
       ),
     );
   }
