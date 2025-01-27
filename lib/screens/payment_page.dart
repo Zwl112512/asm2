@@ -24,7 +24,6 @@ class _PaymentPageState extends State<PaymentPage> {
   Future<void> _submitPayment() async {
     if (_formKey.currentState!.validate()) {
       try {
-        // 准备付款信息
         final paymentInfo = {
           "name": _nameController.text,
           "phone": _phoneController.text,
@@ -37,18 +36,15 @@ class _PaymentPageState extends State<PaymentPage> {
           }
         };
 
-        // 更新 Firestore 中的订单
         await FirebaseFirestore.instance.collection('orders').doc(widget.orderId).update({
           "status": "Completed",
           "paymentInfo": paymentInfo,
         });
 
-        // 显示成功提示
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Payment successful! Order marked as Completed.')),
         );
 
-        // 返回到订单列表页面
         Navigator.pop(context);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -61,73 +57,129 @@ class _PaymentPageState extends State<PaymentPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Payment Information')),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16.0),
-          children: [
-            // 用户姓名
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Full Name'),
-              validator: (value) => value!.isEmpty ? 'Please enter your name' : null,
-            ),
-            // 电话
-            TextFormField(
-              controller: _phoneController,
-              decoration: const InputDecoration(labelText: 'Phone Number'),
-              keyboardType: TextInputType.phone,
-              validator: (value) => value!.isEmpty ? 'Please enter your phone number' : null,
-            ),
-            // 收货地址
-            TextFormField(
-              controller: _addressController,
-              decoration: const InputDecoration(labelText: 'Shipping Address'),
-              validator: (value) => value!.isEmpty ? 'Please enter your address' : null,
-            ),
-            // 付款方式选择
-            DropdownButtonFormField<String>(
-              value: _paymentMethod,
-              items: const [
-                DropdownMenuItem(value: "Credit Card", child: Text("Credit Card")),
-                DropdownMenuItem(value: "PayPal", child: Text("PayPal")),
-                DropdownMenuItem(value: "Cash on Delivery", child: Text("Cash on Delivery")),
+      appBar: AppBar(
+        title: const Text('Payment Information'),
+        backgroundColor: Colors.blueAccent,
+        elevation: 0,
+      ),
+      body: Container(
+        color: Colors.white,
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.all(16.0),
+            children: [
+              // 标题
+              Text(
+                'Total Amount: \$${widget.totalAmount.toStringAsFixed(2)}',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              // 用户姓名
+              _buildInputField(
+                controller: _nameController,
+                labelText: 'Full Name',
+                icon: Icons.person,
+              ),
+              // 电话
+              _buildInputField(
+                controller: _phoneController,
+                labelText: 'Phone Number',
+                icon: Icons.phone,
+                keyboardType: TextInputType.phone,
+              ),
+              // 收货地址
+              _buildInputField(
+                controller: _addressController,
+                labelText: 'Shipping Address',
+                icon: Icons.location_on,
+              ),
+              // 付款方式选择
+              DropdownButtonFormField<String>(
+                value: _paymentMethod,
+                items: const [
+                  DropdownMenuItem(value: "Credit Card", child: Text("Credit Card")),
+                  DropdownMenuItem(value: "PayPal", child: Text("PayPal")),
+                  DropdownMenuItem(value: "Cash on Delivery", child: Text("Cash on Delivery")),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _paymentMethod = value!;
+                  });
+                },
+                decoration: InputDecoration(
+                  labelText: 'Payment Method',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                ),
+              ),
+              const SizedBox(height: 20),
+              // 信用卡信息
+              if (_paymentMethod == "Credit Card") ...[
+                _buildInputField(
+                  controller: _cardNumberController,
+                  labelText: 'Card Number',
+                  icon: Icons.credit_card,
+                  keyboardType: TextInputType.number,
+                ),
+                _buildInputField(
+                  controller: _expiryDateController,
+                  labelText: 'Expiry Date (MM/YY)',
+                  icon: Icons.date_range,
+                ),
+                _buildInputField(
+                  controller: _cvvController,
+                  labelText: 'CVV',
+                  icon: Icons.lock,
+                  keyboardType: TextInputType.number,
+                ),
               ],
-              onChanged: (value) {
-                setState(() {
-                  _paymentMethod = value!;
-                });
-              },
-              decoration: const InputDecoration(labelText: 'Payment Method'),
-            ),
-            // 信用卡信息
-            if (_paymentMethod == "Credit Card") ...[
-              TextFormField(
-                controller: _cardNumberController,
-                decoration: const InputDecoration(labelText: 'Card Number'),
-                keyboardType: TextInputType.number,
-                validator: (value) => value!.isEmpty ? 'Please enter your card number' : null,
-              ),
-              TextFormField(
-                controller: _expiryDateController,
-                decoration: const InputDecoration(labelText: 'Expiry Date (MM/YY)'),
-                validator: (value) => value!.isEmpty ? 'Please enter expiry date' : null,
-              ),
-              TextFormField(
-                controller: _cvvController,
-                decoration: const InputDecoration(labelText: 'CVV'),
-                keyboardType: TextInputType.number,
-                validator: (value) => value!.isEmpty ? 'Please enter CVV' : null,
+              const SizedBox(height: 30),
+              // 提交按钮
+              ElevatedButton(
+                onPressed: _submitPayment,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  'Submit Payment',
+                  style: TextStyle(fontSize: 18),
+                ),
               ),
             ],
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _submitPayment,
-              child: const Text('Submit Payment'),
-            ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+
+  // 公共输入框构造
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required String labelText,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        decoration: InputDecoration(
+          labelText: labelText,
+          prefixIcon: Icon(icon, color: Colors.blueAccent),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+        validator: (value) => value!.isEmpty ? 'Please enter $labelText' : null,
       ),
     );
   }
