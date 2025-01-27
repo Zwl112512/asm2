@@ -75,63 +75,94 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Profile'),
+        backgroundColor: Colors.blueAccent,
+        elevation: 0,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               GestureDetector(
                 onTap: _pickImage,
                 child: CircleAvatar(
-                  radius: 50,
+                  radius: 60,
+                  backgroundColor: Colors.grey[200],
                   backgroundImage: _profileImage != null ? NetworkImage(_profileImage!) : null,
-                  child: _profileImage == null ? const Icon(Icons.person, size: 50) : null,
+                  child: _profileImage == null ? const Icon(Icons.person, size: 60, color: Colors.grey) : null,
                 ),
               ),
               const SizedBox(height: 20),
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Name'),
-                validator: (value) => value!.isEmpty ? 'Please enter your name' : null,
-              ),
+              _buildTextField(_nameController, 'Name', false, Icons.person),
               const SizedBox(height: 10),
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-                enabled: false, // 禁止用户编辑
-              ),
+              _buildTextField(_emailController, 'Email', true, Icons.email),
               const SizedBox(height: 10),
-              TextFormField(
-                controller: _phoneController,
-                decoration: const InputDecoration(labelText: 'Phone'),
-                validator: (value) => value!.isEmpty ? 'Please enter your phone number' : null,
-              ),
+              _buildTextField(_phoneController, 'Phone', false, Icons.phone),
               const SizedBox(height: 10),
-              TextFormField(
-                controller: _addressController,
-                decoration: const InputDecoration(labelText: 'Address'),
-                validator: (value) => value!.isEmpty ? 'Please enter your address' : null,
-              ),
+              _buildTextField(_addressController, 'Address', false, Icons.home),
               const SizedBox(height: 20),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
                 onPressed: _updateUserData,
                 child: const Text('Save Changes'),
               ),
-              ElevatedButton(
+              const SizedBox(height: 10),
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),
+                  side: const BorderSide(color: Colors.blueAccent),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => ChangePasswordPage()),
                   );
                 },
-                child: const Text('Change Password'),
+                child: const Text('Change Password', style: TextStyle(color: Colors.blueAccent)),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField(
+      TextEditingController controller,
+      String label,
+      bool isReadOnly,
+      IconData icon,
+      ) {
+    return TextFormField(
+      controller: controller,
+      readOnly: isReadOnly,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: Colors.blueAccent),
+        filled: true,
+        fillColor: Colors.grey[100],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your $label';
+        }
+        return null;
+      },
     );
   }
 }
