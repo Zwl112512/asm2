@@ -115,7 +115,7 @@ class _MapsPageState extends State<MapsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Nearby Restaurants'),
+        title: Text(''),
         centerTitle: true,
         backgroundColor: Colors.blueAccent,
         actions: [

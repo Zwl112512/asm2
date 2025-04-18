@@ -1,132 +1,158 @@
-import 'package:asm2/consts.dart';
-import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
-import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/chat_provider.dart';
+import '../models/message.dart';
 
-class ChatBotPage extends StatefulWidget {
+class ChatBotPage extends StatelessWidget {
   const ChatBotPage({super.key});
-
-  @override
-  State<ChatBotPage> createState() => _ChatBotPageState();
-}
-
-class _ChatBotPageState extends State<ChatBotPage> {
-  final _openAI = OpenAI.instance.build(
-    token: OPENAI_API_KEY, // 确保在 consts.dart 中正确定义
-    baseOption: HttpSetup(
-      receiveTimeout: const Duration(seconds: 5),
-    ),
-    enableLog: true,
-  );
-
-  final ChatUser _currentUser = ChatUser(id: '1', firstName: 'Jack', lastName: 'cxk');
-  final ChatUser _gptChatUser = ChatUser(id: '2', firstName: 'Chat', lastName: 'GPT');
-  List<ChatMessage> _messages = <ChatMessage>[];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 2,
-        title: Row(
-          children: [
-            Icon(Icons.chat, color: Colors.teal),
-            const SizedBox(width: 10),
-            const Text(
-              'Chat Bot',
-              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        centerTitle: true,
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.white, Color(0xFFE0F7FA)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: DashChat(
-          currentUser: _currentUser,
-          messageOptions: const MessageOptions(
-            currentUserContainerColor: Colors.teal,
-            currentUserTextColor: Colors.white,
-            containerColor: Colors.white,
-            textColor: Colors.black,
-            borderRadius: 18, // 设置聊天气泡的圆角
-          ),
-          inputOptions: const InputOptions(
-            inputDecoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white,
-              hintText: 'Type a message...',
-              prefixIcon: Icon(Icons.message, color: Colors.teal),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(25)),
-                borderSide: BorderSide(color: Colors.teal),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(25)),
-                borderSide: BorderSide(color: Colors.teal, width: 2),
-              ),
-            ),
-          ),
-          onSend: (ChatMessage m) {
-            getChatResponse(m);
-          },
-          messages: _messages,
-        ),
-      ),
+      appBar: AppBar(title: const Text("Chat bot")),
+      body: const _ChatBody(),
     );
   }
+}
 
-  Future<void> getChatResponse(ChatMessage m) async {
-    setState(() {
-      _messages.insert(0, m);
-    });
+class _ChatBody extends StatefulWidget {
+  const _ChatBody();
 
-    List<Map<String, dynamic>> _messagesHistory = _messages.reversed.map((msg) {
-      if (msg.user == _currentUser) {
-        return {"role": "user", "content": msg.text};
-      } else {
-        return {"role": "assistant", "content": msg.text};
-      }
-    }).toList();
+  @override
+  _ChatBodyState createState() => _ChatBodyState();
+}
 
-    final request = ChatCompleteText(
-      model: Gpt4oMini2024ChatModel(),
-      messages: _messagesHistory,
-      maxToken: 200,
-    );
+class _ChatBodyState extends State<_ChatBody> {
+  final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  late ChatProvider _chatProvider;
 
-    try {
-      final response = await _openAI.onChatCompletion(request: request);
-      final botMessage = response?.choices[0].message?.content ?? "No response";
+  @override
+  void initState() {
+    super.initState();
+    _chatProvider = Provider.of<ChatProvider>(context, listen: false);
+    _chatProvider.addListener(_scrollToBottom);
+  }
 
-      setState(() {
-        _messages.insert(
-          0,
-          ChatMessage(
-            user: _gptChatUser,
-            text: botMessage,
-            createdAt: DateTime.now(),
-          ),
-        );
-      });
-    } catch (e) {
-      setState(() {
-        _messages.insert(
-          0,
-          ChatMessage(
-            user: _gptChatUser,
-            text: "Error: ${e.toString()}",
-            createdAt: DateTime.now(),
-          ),
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _chatProvider.removeListener(_scrollToBottom);
+    super.dispose();
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
         );
       });
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(
+          child: Consumer<ChatProvider>(
+            builder: (context, provider, child) {
+              return ListView.builder(
+                controller: _scrollController,
+                reverse: false,
+                itemCount: provider.messages.length,
+                itemBuilder: (context, index) {
+                  return MessageBubble(
+                    message: provider.messages[index],
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: _buildInputArea(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInputArea(BuildContext context) {
+    return Consumer<ChatProvider>(
+      builder: (context, provider, child) {
+        return Column(
+          children: [
+            if (provider.isLoading)
+              const LinearProgressIndicator(
+                minHeight: 2,
+                color: Colors.blue,
+              ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: const InputDecoration(
+                      hintText: "Type a message...",
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                    maxLines: 3,
+                    minLines: 1,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.send, color: Colors.blue),
+                  onPressed: provider.isLoading
+                      ? null
+                      : () async {
+                    if (_controller.text.trim().isNotEmpty) {
+                      await provider.sendMessage(_controller.text.trim());
+                      _controller.clear();
+                    }
+                  },
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class MessageBubble extends StatelessWidget {
+  final Message message;
+
+  const MessageBubble({required this.message, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.75,
+        ),
+        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: message.isUser ? Colors.blue.shade600 : Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Text(
+          message.content,
+          style: TextStyle(
+            color: message.isUser ? Colors.white : Colors.black,
+            fontSize: 16,
+          ),
+        ),
+      ),
+    );
   }
 }
